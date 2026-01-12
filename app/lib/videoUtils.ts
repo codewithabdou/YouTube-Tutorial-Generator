@@ -1,4 +1,4 @@
-import ytdl from "@distube/ytdl-core";
+// extractVideoId is defined in this file, no import needed
 
 // Extract video ID from various YouTube URL formats
 export function extractVideoId(url: string): string | null {
@@ -23,43 +23,36 @@ export interface VideoInfo {
 
 /**
  * Get video information including thumbnails at various points
- * YouTube provides thumbnails at specific positions which we can use for visual code extraction
+ * Uses OEmbed as the primary reliable source.
  */
 export async function getVideoInfo(videoId: string): Promise<VideoInfo> {
     try {
-        const url = `https://www.youtube.com/watch?v=${videoId}`;
-        const info = await ytdl.getInfo(url);
+        // Strategy: OEmbed (Public API, very reliable)
+        // Note: OEmbed doesn't provide duration, but it's acceptable for now as we don't strictly need it for generation
+        // If duration is needed later, we might need a dedicated API key solution or a different lightweight scraper
+        console.log(`[VideoInfo] Fetching info for ${videoId} via OEmbed`);
 
-        const videoDetails = info.videoDetails;
-        const duration = parseInt(videoDetails.lengthSeconds) || 0;
+        const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+        const response = await fetch(oembedUrl);
 
-        // Get standard thumbnails
-        const thumbnails = videoDetails.thumbnails
-            .sort((a, b) => (b.width || 0) - (a.width || 0))
-            .map(t => t.url);
-
-        // Try to find storyboard/sprite URL from player response
-        let storyboardUrl: string | null = null;
-
-        // Get storyboard info if available (undocumented but still works for many videos)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const storyboardData = (info as any).player_response?.storyboards?.playerStoryboardSpecRenderer?.spec;
-        if (storyboardData) {
-            // Storyboard spec format: baseUrl|other|params
-            const parts = storyboardData.split('|');
-            if (parts[0]) {
-                storyboardUrl = parts[0];
-            }
+        if (!response.ok) {
+            throw new Error(`OEmbed failed with status ${response.status}`);
         }
 
+        const data = await response.json();
+
         return {
-            title: videoDetails.title,
-            duration,
-            thumbnails,
-            storyboardUrl,
+            title: data.title,
+            duration: 0, // Duration not available in OEmbed
+            thumbnails: [
+                data.thumbnail_url,
+                `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+                `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+            ],
+            storyboardUrl: null
         };
     } catch (error) {
-        console.error("Error getting video info:", error);
+        console.error("Video info fetch failed:", error);
         throw new Error("Could not fetch video information. The video may be private or restricted.");
     }
 }

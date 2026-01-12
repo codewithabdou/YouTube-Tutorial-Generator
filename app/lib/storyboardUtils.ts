@@ -1,4 +1,3 @@
-import ytdl from "@distube/ytdl-core";
 import sharp from "sharp";
 
 interface StoryboardInfo {
@@ -16,57 +15,12 @@ interface StoryboardInfo {
  * Storyboards are sprite sheets containing multiple frames used for video preview
  */
 export async function getStoryboardInfo(videoId: string): Promise<StoryboardInfo | null> {
-    try {
-        const url = `https://www.youtube.com/watch?v=${videoId}`;
-        const info = await ytdl.getInfo(url);
-
-        // Try to get storyboard spec from player response
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const playerResponse = info as any;
-        const storyboardSpec =
-            playerResponse.player_response?.storyboards?.playerStoryboardSpecRenderer?.spec ||
-            playerResponse.storyboards?.playerStoryboardSpecRenderer?.spec;
-
-        if (!storyboardSpec) {
-            console.log("[Storyboard] No storyboard spec found in video info");
-            return null;
-        }
-
-        // Parse the storyboard spec
-        // Format: baseUrl|$L|$N|width|height|frameCount|intervalMs|something|sigh|...
-        const parts = storyboardSpec.split("|");
-        if (parts.length < 8) {
-            console.log("[Storyboard] Invalid storyboard spec format");
-            return null;
-        }
-
-        const baseUrl = parts[0];
-        const frameWidth = parseInt(parts[3]) || 120;
-        const frameHeight = parseInt(parts[4]) || 68;
-        const totalFrames = parseInt(parts[5]) || 100;
-
-        // Standard storyboard layout: 5 columns, 5 rows = 25 frames per sheet
-        const cols = 5;
-        const rows = 5;
-        const framesPerSheet = cols * rows;
-        const totalSheets = Math.ceil(totalFrames / framesPerSheet);
-
-        console.log(`[Storyboard] Found: ${totalFrames} frames, ${totalSheets} sheets, ${frameWidth}x${frameHeight}`);
-
-        return {
-            baseUrl,
-            cols,
-            rows,
-            frameWidth,
-            frameHeight,
-            frameCount: totalFrames,
-            totalSheets,
-        };
-    } catch (error) {
-        console.error("[Storyboard] Error getting storyboard info:", error);
-        return null;
-    }
+    // Storyboard extraction relied on @distube/ytdl-core which has been removed.
+    // Returning null will trigger the fallback to standard thumbnails.
+    console.log("[Storyboard] Storyboard extraction disabled (ytdl-core removed). Using fallback.");
+    return null;
 }
+
 
 /**
  * Generate storyboard sheet URLs for a video

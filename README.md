@@ -55,4 +55,3 @@ Transform any YouTube coding video into a professional, step-by-step written tut
 2. Click **"Generate Tutorial"**.
 3. Watch as the AI reconstructs the code and explanation.
 4. Export as **Markdown** or **PDF** to save your tutorial.
-

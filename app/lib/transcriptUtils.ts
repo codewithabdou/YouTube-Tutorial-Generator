@@ -7,15 +7,18 @@ export interface TranscriptResult {
 
 /**
  * Fetches transcript using youtube-caption-extractor
+ * Previous strategies using youtube-transcript and ytdl-core were removed due to reliability issues.
  */
 export async function fetchTranscriptWithFallback(
     videoId: string
 ): Promise<TranscriptResult | null> {
     console.log(`[Transcript] Fetching transcript for ${videoId}...`);
 
+    // Strategy: youtube-caption-extractor
     try {
+        console.log(`[Transcript] Attempting strategy: youtube-caption-extractor`);
         // Try English first, then auto-generated
-        const langs = ["en", "en-US", "en-GB"];
+        const langs = ["en", "en-US", "en-GB", "auto"];
 
         for (const lang of langs) {
             try {
@@ -25,7 +28,7 @@ export async function fetchTranscriptWithFallback(
                     const text = subtitles.map((s: { text: string }) => s.text).join(" ");
 
                     if (text.trim().length >= 50) {
-                        console.log(`[Transcript] Success (${lang}): ${text.length} chars`);
+                        console.log(`[Transcript] Success (youtube-caption-extractor/${lang}): ${text.length} chars`);
                         return { text, source: `youtube-caption-extractor (${lang})` };
                     }
                 }
@@ -33,13 +36,11 @@ export async function fetchTranscriptWithFallback(
                 // Try next language
             }
         }
-
-        console.log(`[Transcript] No captions found for any language`);
-        return null;
-
     } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.error(`[Transcript] Failed: ${msg}`);
-        return null;
+        console.log(`[Transcript] Strategy failed: ${(err as Error).message}`);
     }
+
+    console.log(`[Transcript] All strategies failed. No captions found.`);
+    return null;
 }
+

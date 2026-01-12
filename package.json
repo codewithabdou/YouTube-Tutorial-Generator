@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@distube/ytdl-core": "^4.16.12",
     "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-progress": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
@@ -27,9 +26,7 @@
     "react-markdown": "^10.1.0",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.4.0",
-    "youtube-caption-extractor": "^1.9.1",
-    "youtube-captions-scraper": "^2.0.3",
-    "youtube-transcript": "^1.2.1"
+    "youtube-caption-extractor": "^1.9.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
