@@ -26,7 +26,8 @@
     "react-markdown": "^10.1.0",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.4.0",
-    "youtube-caption-extractor": "^1.9.1"
+    "youtube-caption-extractor": "^1.9.1",
+    "youtubei.js": "^16.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -344,9 +344,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch transcript
+    // Transcript fetch logic updated to handle errors explicitly in transcriptUtils
     let transcript: string | null = null;
     let transcriptSource: string | null = null;
+    let fetchError = "";
 
     try {
       console.log(`[API] Fetching transcript...`);
@@ -358,15 +359,17 @@ export async function POST(request: NextRequest) {
         console.log(`[API] Transcript success via ${result.source}: ${result.text.length} chars`);
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error(`[API] Transcript error: ${errorMessage}`);
+      fetchError = err instanceof Error ? err.message : String(err);
+      console.error(`[API] Transcript error: ${fetchError}`);
     }
 
     // Must have transcript
     if (!transcript) {
       return NextResponse.json(
         {
-          error: "Could not extract transcript from this video.\n\nTips:\n• Make sure the video has captions/subtitles enabled\n• Auto-generated captions work too\n• Some videos have region-restricted captions"
+          error: "Could not extract transcript from this video.",
+          details: fetchError,
+          tips: "Make sure the video has captions enabled. Vercel IPs may be blocked by YouTube."
         },
         { status: 400 }
       );
